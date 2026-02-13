@@ -1,0 +1,46 @@
+<?php
+/**
+ * Copyright (c) Lobbster
+ * See LICENSE for license details.
+ *
+ * @var \Lobbster\ProductViewAttributeGroups\Block\Product\AttributeGroups $block
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \Magento\Catalog\Model\Product|null $product Output::productAttribute() expects Product in product view context
+ */
+$viewModel = $block->getViewModel();
+if (!$viewModel) {
+    return;
+}
+
+$product = $viewModel->getProduct();
+$outputHelper = $viewModel->getOutputHelper();
+$groups = $viewModel->getGroups();
+?>
+<?php if ($product && $outputHelper && !empty($groups)): ?>
+<div class="product-view-attribute-groups block attribute-groups">
+    <?php foreach ($groups as $group): ?>
+        <?php $groupTitle = $group['title'] ?? $group['code'] ?? ''; ?>
+        <div class="additional-attributes-wrapper table-wrapper product-view-attribute-group"
+             data-group-code="<?= $escaper->escapeHtmlAttr($group['code'] ?? '') ?>">
+            <h3 class="product-view-attribute-group-title"><?= $escaper->escapeHtml($groupTitle) ?></h3>
+            <table class="data table additional-attributes">
+                <caption class="table-caption"><?= $escaper->escapeHtml($groupTitle) ?></caption>
+                <tbody>
+                <?php foreach ($group['attributes'] ?? [] as $attr): ?>
+                    <tr>
+                        <th class="col label" scope="row"><?= $escaper->escapeHtml($attr['label'] ?? '') ?></th>
+                        <td class="col data" data-th="<?= $escaper->escapeHtmlAttr($attr['label'] ?? '') ?>">
+                            <?= /* @noEscape */ $outputHelper->productAttribute(
+                                $product,
+                                $attr['value'] ?? '',
+                                $attr['code'] ?? ''
+                            ) ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    <?php endforeach; ?>
+</div>
+<?php endif; ?>

@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright (c) Lobbster
+ * See LICENSE for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="catalog">
+            <group id="product_view_attribute_groups" translate="label" type="text" sortOrder="95"
+                    showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Product Attribute View Groups</label>
+                <field id="enabled" translate="label comment" type="select" sortOrder="10"
+                        showInDefault="1" showInWebsite="1" showInStore="1"><label>Enable Attribute Groups on Product View</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Show attributes grouped by attribute set groups with configured prefix (e.g. pview_).</comment>
+                </field>
+                <field id="prefix" translate="label comment" type="text" sortOrder="20"
+                        showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Attribute Group Name Prefix</label>
+                    <comment>Only groups whose name starts with this prefix are shown (e.g. pview_ for "pview_Truck" → "Truck").</comment>
+                    <validate>validate-no-empty</validate>
+                </field>
+                <field id="require_visible_on_front" translate="label comment" type="select" sortOrder="30"
+                        showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Require Visible on Front</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Only include attributes with "Visible on Catalog Pages on Storefront" = Yes.</comment>
+                </field>
+                <field id="denylist_csv" translate="label comment" type="text" sortOrder="40"
+                        showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Attribute Codes Denylist</label>
+                    <comment>Comma-separated attribute codes to never show (e.g. sku, url_key).</comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

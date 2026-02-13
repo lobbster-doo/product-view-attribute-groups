@@ -1,0 +1,23 @@
+{
+    "name": "lobbster/product-view-attribute-groups",
+    "description": "Renders product attributes on the product view page grouped by Attribute Groups (pview_ prefix). Uses Magento's Attribute Set / Attribute Group system with no custom admin UI.",
+    "type": "magento2-module",
+    "version": "1.0.0",
+    "license": [
+        "MIT"
+    ],
+    "require": {
+        "php": ">=8.1",
+        "magento/framework": "*",
+        "magento/module-catalog": "*",
+        "magento/module-store": "*"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Lobbster\\ProductViewAttributeGroups\\": ""
+        }
+    }
+}

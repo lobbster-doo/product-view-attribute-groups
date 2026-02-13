@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright (c) Lobbster
+ * See LICENSE for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <catalog>
+            <product_view_attribute_groups>
+                <enabled>1</enabled>
+                <prefix>pview_</prefix>
+                <require_visible_on_front>1</require_visible_on_front>
+                <denylist_csv></denylist_csv>
+            </product_view_attribute_groups>
+        </catalog>
+    </default>
+</config>

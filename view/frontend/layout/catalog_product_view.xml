@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright (c) Lobbster
+ * See LICENSE for license details.
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="product.info.details">
+            <block class="Lobbster\ProductViewAttributeGroups\Block\Product\AttributeGroups"
+                   name="product.view.attribute.groups"
+                   as="attribute_groups"
+                   template="Lobbster_ProductViewAttributeGroups::product/attribute-groups.phtml"
+                   group="detailed_info"
+                   before="product.attributes">
+                <arguments>
+                    <argument name="view_model" xsi:type="object">Lobbster\ProductViewAttributeGroups\ViewModel\Product\AttributeGroups</argument>
+                    <argument name="cache_lifetime" xsi:type="number">3600</argument>
+                    <argument name="title" translate="true" xsi:type="string">Specifications</argument>
+                    <argument name="sort_order" xsi:type="string">15</argument>
+                </arguments>
+            </block>
+        </referenceBlock>
+    </body>
+</page>
