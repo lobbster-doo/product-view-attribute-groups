@@ -1,7 +1,6 @@
 <?php
 /**
- * Copyright (c) Lobbster
- * See LICENSE for license details.
+ * Copyright (c) 2026 Lobbster. See LICENSE for license details.
  */
 
 declare(strict_types=1);
@@ -95,5 +94,38 @@ class AttributeGroups implements ArgumentInterface
         }
 
         return $this->groupProvider->getGroupsForProduct($product, (int) $product->getStoreId());
+    }
+
+    /**
+     * Prefix for attribute group names (for block cache key).
+     *
+     * @param int|null $storeId
+     * @return string
+     */
+    public function getPrefix(?int $storeId = null): string
+    {
+        return $this->config->getPrefix($storeId);
+    }
+
+    /**
+     * Whether to require visible on front (for block cache key).
+     *
+     * @param int|null $storeId
+     * @return bool
+     */
+    public function getRequireVisibleOnFront(?int $storeId = null): bool
+    {
+        return $this->config->getRequireVisibleOnFront($storeId);
+    }
+
+    /**
+     * Denylist of attribute codes (for block cache key).
+     *
+     * @param int|null $storeId
+     * @return string[]
+     */
+    public function getDenylist(?int $storeId = null): array
+    {
+        return $this->config->getDenylist($storeId);
     }
 }

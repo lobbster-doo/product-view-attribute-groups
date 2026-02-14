@@ -14,7 +14,7 @@ Magento 2 module that renders product attributes on the product view page **grou
 
 2. **ViewModel** (`AttributeGroups`) checks if the module is enabled for the store. If enabled, it calls **GroupProvider** to fetch groups and attributes. The ViewModel also provides `Magento\Catalog\Helper\Output` for rendering attribute values (HTML, wysiwyg, etc.).
 
-3. **GroupProvider** loads EAV attribute groups from the product's attribute set, filters by prefix, resolves attributes with values, and returns a structured array. Block output is cached by Magento (no custom data cache).
+3. **GroupProvider** loads EAV attribute groups from the product's attribute set, filters by prefix, resolves attributes with values, and returns a structured array. Group structure (per attribute set/store/config) is cached in app cache; block HTML is cached by Magento.
 
 4. **Template** renders the groups as HTML tables (same structure as core "More Information" block) with null-safe access to all values.
 
@@ -121,7 +121,12 @@ Group titles are derived automatically: prefix stripped, then prettified (e.g. `
 
 ## Cache
 
-- Block HTML is cached by Magento (1 hour by default) with cache keys including `product_id`, `store_id`, `attribute_set_id`, and tags `catalog_product_{id}` for product-specific invalidation.
+- **Structure cache** (GroupProvider): Group structure (groups + attribute metadata, no values) is cached per attribute set, store, and config (prefix, denylist, require visible). Cache key prefix `pview_group_structure_`; tags `pview_attribute_groups`, `pview_as_{setId}`. Products sharing the same attribute set reuse this cache.
+- **Block HTML**: Cached by Magento (1 hour by default via layout `cache_lifetime`). Cache keys include `product_id`, `store_id`, `attribute_set_id`, and a hash of config (prefix, denylist, require visible). Identities: `catalog_product_{id}`, `pview_as_{setId}` so full page cache is invalidated when the product or its attribute set data changes.
+- **Invalidation**: **PviewCacheFlusher** cleans both app cache and full page cache by tag when:
+  - An attribute set is saved or deleted (observer `eav_entity_attribute_set_save_after` / `_delete_after`),
+  - An entity attribute (assignment to set/group) is saved or deleted and the group is pview-prefixed (observer `eav_entity_attribute_save_after` / `_delete_after`),
+  - An attribute group (name/sort) is saved or deleted and the group name is pview-prefixed (plugin on `Eav\ResourceModel\Entity\Attribute\Group`).
 
 ---
 
@@ -130,20 +135,38 @@ Group titles are derived automatically: prefix stripped, then prettified (e.g. `
 ```
 app/code/Lobbster/ProductViewAttributeGroups/
 ├── Block/Product/AttributeGroups.php      # Cache keys/tags; delegates to ViewModel
-├── Model/Config.php                        # Reads module config
+├── Model/
+│   ├── Config.php                         # Reads module config
+│   ├── PviewCacheFlusher.php              # Flush structure + FPC by attribute set tag
+│   └── PviewFlushHelper.php               # Detect pview group/set for flush logic
+├── Observer/
+│   ├── FlushOnAttributeSetChange.php     # Flush on set save/delete
+│   └── FlushOnEntityAttributeChange.php   # Flush on entity-attribute save/delete (pview group)
+├── Plugin/Eav/ResourceModel/Entity/Attribute/Group/
+│   └── DispatchGroupEventsPlugin.php     # Flush on group save/delete (pview name)
 ├── Service/
 │   ├── AttributeValueResolver.php        # Resolves frontend value per attribute
-│   ├── GroupProvider.php                 # Loads groups + attributes
+│   ├── GroupProvider.php                 # Loads groups + attributes; structure cache
 │   └── TitleFormatter.php                # Formats group name → display title
 ├── ViewModel/Product/AttributeGroups.php  # getProduct(), getGroups(), getOutputHelper()
 ├── view/frontend/
 │   ├── layout/catalog_product_view.xml   # Block placement
 │   ├── templates/product/attribute-groups.phtml
 │   └── web/css/source/_module.less
+├── Test/Integration/
+│   ├── Service/GroupProviderTest.php
+│   └── _files/attribute_set_with_pview_groups.php
 ├── docs/                                   # Screenshots for README
+├── phpcs.xml                              # MCS; excludes 3rd-party copyright sniff
 └── etc/
     ├── config.xml
-    └── adminhtml/system.xml
+    ├── module.xml
+    ├── di.xml                             # Plugin registration
+    ├── acl.xml
+    ├── events.xml                        # (none for frontend)
+    └── adminhtml/
+        ├── events.xml                    # Observers for set/entity-attribute
+        └── system.xml
 ```
 
 ---
@@ -175,6 +198,16 @@ vendor/bin/phpunit -c dev/tests/integration/phpunit.xml.dist \
 ```
 
 Or create a local `dev/tests/integration/etc/install-config-mysql.php` with your DB settings (this file is usually not committed).
+
+---
+
+## Code quality
+
+The module includes a `phpcs.xml` that extends Magento Coding Standard and excludes the 3rd-party copyright header sniff. To run PHP_CodeSniffer on this module only:
+
+```bash
+vendor/bin/phpcs --standard=app/code/Lobbster/ProductViewAttributeGroups/phpcs.xml app/code/Lobbster/ProductViewAttributeGroups
+```
 
 ---
 

@@ -1,7 +1,6 @@
 <?php
 /**
- * Copyright (c) Lobbster
- * See LICENSE for license details.
+ * Copyright (c) 2026 Lobbster. See LICENSE for license details.
  */
 
 declare(strict_types=1);
@@ -36,10 +35,23 @@ class AttributeValueResolver
      *
      * @param AbstractAttribute $attribute
      * @param ProductInterface $product
+     * @param int|null $storeId Optional store for option labels / scope
      * @return string|null
      */
-    public function getFrontendValue(AbstractAttribute $attribute, ProductInterface $product): ?string
-    {
+    public function getFrontendValue(
+        AbstractAttribute $attribute,
+        ProductInterface $product,
+        ?int $storeId = null
+    ): ?string {
+        $code = $attribute->getAttributeCode();
+        $raw = $product->getData($code);
+        if ($raw === null || $raw === '' || (is_array($raw) && empty($raw))) {
+            return null;
+        }
+
+        if ($storeId !== null) {
+            $attribute->setStoreId($storeId);
+        }
         /** @var \Magento\Framework\DataObject $product frontend getValue() expects DataObject; Product extends it */
         $value = $attribute->getFrontend()->getValue($product);
 

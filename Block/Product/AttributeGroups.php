@@ -1,15 +1,17 @@
 <?php
 /**
- * Copyright (c) Lobbster
- * See LICENSE for license details.
+ * Copyright (c) 2026 Lobbster. See LICENSE for license details.
  */
 
 declare(strict_types=1);
 
 namespace Lobbster\ProductViewAttributeGroups\Block\Product;
 
+use Lobbster\ProductViewAttributeGroups\Service\GroupProvider;
 use Lobbster\ProductViewAttributeGroups\ViewModel\Product\AttributeGroups as AttributeGroupsViewModel;
 use Magento\Catalog\Api\Data\ProductInterface;
+use Magento\Catalog\Model\Product;
+use Magento\Framework\DataObject\IdentityInterface;
 use Magento\Framework\View\Element\Template;
 
 /**
@@ -17,7 +19,7 @@ use Magento\Framework\View\Element\Template;
  *
  * Handles caching only. All logic delegated to ViewModel.
  */
-class AttributeGroups extends Template
+class AttributeGroups extends Template implements IdentityInterface
 {
     /**
      * Get current product from ViewModel.
@@ -42,38 +44,61 @@ class AttributeGroups extends Template
     }
 
     /**
-     * Block cache varies by product, store and attribute set.
+     * Block cache varies by product, store, attribute set and module config (prefix/denylist/requireVisible).
      *
      * @return array
      */
     public function getCacheKeyInfo(): array
     {
-        $keys = parent::getCacheKeyInfo();
-        $product = $this->getProduct();
-        
-        if ($product && $product->getId()) {
-            $keys['product_id'] = $product->getId();
-            $keys['store_id'] = $product->getStoreId();
-            $keys['attribute_set_id'] = $product->getAttributeSetId();
+        $cacheKey = '_cache_key_info';
+        if ($this->getData($cacheKey) === null) {
+            $keys = parent::getCacheKeyInfo();
+            $product = $this->getProduct();
+            $viewModel = $this->getViewModel();
+            if ($product && $product->getId()) {
+                $keys['product_id'] = $product->getId();
+                $keys['store_id'] = $product->getStoreId();
+                $keys['attribute_set_id'] = $product->getAttributeSetId();
+                if ($viewModel) {
+                    $storeId = (int) $product->getStoreId();
+                    $denylist = $viewModel->getDenylist($storeId);
+                    sort($denylist);
+                    $keys['pview_cfg'] = substr(
+                        hash('sha256', (string) json_encode([
+                            $viewModel->getPrefix($storeId),
+                            $viewModel->getRequireVisibleOnFront($storeId),
+                            $denylist,
+                        ])),
+                        0,
+                        32
+                    );
+                }
+            }
+            $this->setData($cacheKey, $keys);
         }
-        
-        return $keys;
+        return (array) $this->getData($cacheKey);
     }
 
     /**
-     * Cache tags for product-specific invalidation.
+     * Identities: product (Product::CACHE_TAG), pview set tag.
      *
-     * @return array
+     * Never call $product->getIdentities() to avoid ConfigurableProduct/stock plugins and heavy identity logic.
+     *
+     * @return string[]
      */
-    public function getCacheTags(): array
+    public function getIdentities(): array
     {
-        $tags = parent::getCacheTags();
         $product = $this->getProduct();
-        
-        if ($product && $product->getId()) {
-            $tags[] = 'catalog_product_' . $product->getId();
+        if (!$product || !$product->getId()) {
+            return [];
         }
-        
-        return $tags;
+        $ids = [
+            Product::CACHE_TAG . '_' . (int) $product->getId(),
+        ];
+        $setId = (int) $product->getAttributeSetId();
+        if ($setId > 0) {
+            $ids[] = GroupProvider::CACHE_TAG_SET_PREFIX . $setId;
+        }
+        return $ids;
     }
 }

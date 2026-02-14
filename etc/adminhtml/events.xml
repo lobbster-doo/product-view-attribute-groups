@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright (c) 2026 Lobbster. See LICENSE for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+
+    <event name="eav_entity_attribute_save_after">
+        <observer name="pview_flush_on_entity_attr_save" instance="Lobbster\ProductViewAttributeGroups\Observer\FlushOnEntityAttributeChange"/>
+    </event>
+    <event name="eav_entity_attribute_delete_after">
+        <observer name="pview_flush_on_entity_attr_delete" instance="Lobbster\ProductViewAttributeGroups\Observer\FlushOnEntityAttributeChange"/>
+    </event>
+
+    <event name="eav_entity_attribute_set_save_after">
+        <observer name="pview_flush_on_set_save" instance="Lobbster\ProductViewAttributeGroups\Observer\FlushOnAttributeSetChange"/>
+    </event>
+    <event name="eav_entity_attribute_set_delete_after">
+        <observer name="pview_flush_on_set_delete" instance="Lobbster\ProductViewAttributeGroups\Observer\FlushOnAttributeSetChange"/>
+    </event>
+</config>

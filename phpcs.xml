@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright (c) 2026 Lobbster. See LICENSE for license details.
+ */
+-->
+<ruleset name="Lobbster_ProductViewAttributeGroups">
+    <description>Magento Coding Standard for ProductViewAttributeGroups (excludes 3rd-party header)</description>
+    <rule ref="Magento2"/>
+    <rule ref="Magento2Framework"/>
+    <!-- 3rd party: allow Lobbster copyright instead of Adobe -->
+    <rule ref="Magento2Framework.Header.Copyright">
+        <exclude name="Magento2Framework.Header.Copyright.FoundCopyrightMissingOrWrongFormat"/>
+    </rule>
+    <rule ref="Magento2Framework.Header.CopyrightAnotherExtensionsFiles">
+        <exclude name="Magento2Framework.Header.CopyrightAnotherExtensionsFiles.FoundCopyrightMissingOrWrongFormat"/>
+    </rule>
+    <file>.</file>
+</ruleset>
