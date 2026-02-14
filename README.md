@@ -124,7 +124,7 @@ Group titles are derived automatically: prefix stripped, then prettified (e.g. `
 - **Structure cache** (GroupProvider): Group structure (groups + attribute metadata, no values) is cached per attribute set, store, and config (prefix, denylist, require visible). Cache key prefix `pview_group_structure_`; tags `pview_attribute_groups`, `pview_as_{setId}`. Products sharing the same attribute set reuse this cache.
 - **Block HTML**: Cached by Magento (1 hour by default via layout `cache_lifetime`). Cache keys include `product_id`, `store_id`, `attribute_set_id`, and a hash of config (prefix, denylist, require visible). Identities: `catalog_product_{id}`, `pview_as_{setId}` so full page cache is invalidated when the product or its attribute set data changes.
 - **Invalidation**: **PviewCacheFlusher** cleans both app cache and full page cache by tag when:
-  - An attribute set is saved or deleted (observer `eav_entity_attribute_set_save_after` / `_delete_after`),
+  - An attribute set is **deleted** (observer `eav_entity_attribute_set_delete_after`). Set save is not observed because the set entity does not affect group structure.
   - An entity attribute (assignment to set/group) is saved or deleted and the group is pview-prefixed (observer `eav_entity_attribute_save_after` / `_delete_after`),
   - An attribute group (name/sort) is saved or deleted and the group name is pview-prefixed (plugin on `Eav\ResourceModel\Entity\Attribute\Group`).
 
@@ -175,11 +175,10 @@ app/code/Lobbster/ProductViewAttributeGroups/
 
 Integration tests require a running MySQL and (for the default Magento test setup) OpenSearch. RabbitMQ is **not** required: the project’s integration install config uses `queue-default-connection=db`.
 
-**Run the integration test:**
+**Run the integration test** (from the Magento root):
 
 ```bash
-vendor/bin/phpunit -c dev/tests/integration/phpunit.xml.dist \
-  app/code/Lobbster/ProductViewAttributeGroups/Test/Integration/Service/GroupProviderTest.php
+vendor/bin/phpunit -c dev/tests/integration/phpunit.xml.dist --filter GroupProviderTest
 ```
 
 **DB credentials:** The bootstrap uses `dev/tests/integration/etc/install-config-mysql.php` (or `.dist` if that file is missing). Override via environment variables so the test sandbox can connect:
@@ -193,8 +192,7 @@ Example (no password for root):
 
 ```bash
 export MAGENTO_INTEGRATION_DB_PASSWORD=""
-vendor/bin/phpunit -c dev/tests/integration/phpunit.xml.dist \
-  app/code/Lobbster/ProductViewAttributeGroups/Test/Integration/Service/GroupProviderTest.php
+vendor/bin/phpunit -c dev/tests/integration/phpunit.xml.dist --filter GroupProviderTest
 ```
 
 Or create a local `dev/tests/integration/etc/install-config-mysql.php` with your DB settings (this file is usually not committed).

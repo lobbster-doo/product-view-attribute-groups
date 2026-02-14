@@ -14,9 +14,7 @@
         <observer name="pview_flush_on_entity_attr_delete" instance="Lobbster\ProductViewAttributeGroups\Observer\FlushOnEntityAttributeChange"/>
     </event>
 
-    <event name="eav_entity_attribute_set_save_after">
-        <observer name="pview_flush_on_set_save" instance="Lobbster\ProductViewAttributeGroups\Observer\FlushOnAttributeSetChange"/>
-    </event>
+    <!-- Only on delete: set save does not change group structure (groups/attributes have their own observers). -->
     <event name="eav_entity_attribute_set_delete_after">
         <observer name="pview_flush_on_set_delete" instance="Lobbster\ProductViewAttributeGroups\Observer\FlushOnAttributeSetChange"/>
     </event>

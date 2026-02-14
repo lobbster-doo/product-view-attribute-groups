@@ -13,7 +13,10 @@ use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 
 /**
- * Flush pview structure cache when an attribute set is saved or deleted.
+ * Flush pview structure cache when an attribute set is deleted.
+ *
+ * Set save is not observed: the set entity (name etc.) does not affect group structure;
+ * group/attribute changes are handled by FlushOnEntityAttributeChange and DispatchGroupEventsPlugin.
  */
 class FlushOnAttributeSetChange implements ObserverInterface
 {
